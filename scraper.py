@@ -3,7 +3,7 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 from search import common_search, search_qualtrics, search_domo, search_fusion, search_bamboohr
-from linkedin import search_linkedin
+from linkedin import search_utah_linkedin, search_usa_linkedin
 
 # List of companies and their respective URLs and job search parameters
 UtahCompanies = [
@@ -15,31 +15,68 @@ UtahCompanies = [
 
 def setup_webdriver():
     """Set up and return a Selenium WebDriver."""
-    service = Service(ChromeDriverManager().install())
-    return webdriver.Chrome(service=service)
+    try:
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service)
+        print("WebDriver setup successfully.")
+        return driver
+    except Exception as e:
+        print(f"Failed to set up WebDriver: {e}")
 
 def find_utah_jobs():
     """Search for jobs across multiple companies using a single WebDriver instance."""
     driver = setup_webdriver()
+    if not driver:
+        print("WebDriver not initialized.")
+        return []
     all_jobs = []
     try:
-        print(f"\nSearching Linkedin jobs")
-        jobs = search_linkedin(driver)
-        print(jobs)
-        all_jobs.extend(jobs)
-        # qulatrics_jobs = search_qualtrics(driver)
-        # domo_jobs = search_domo(driver)
-        # fusion_jobs = search_fusion(driver)
-        # bamboohr_jobs = search_bamboohr(driver)
-        # all_jobs.extend(qulatrics_jobs)
-        # all_jobs.extend(domo_jobs)
-        # all_jobs.extend(fusion_jobs)
-        # all_jobs.extend(bamboohr_jobs)
-        # for company in UtahCompanies:
-        #     print(f"\nSearching jobs for {company['companyName']}")
-        #     jobs = common_search(driver, company)
-        #     all_jobs.extend(jobs)
+        qulatrics_jobs = search_qualtrics(driver)
+        domo_jobs = search_domo(driver)
+        fusion_jobs = search_fusion(driver)
+        bamboohr_jobs = search_bamboohr(driver)
+        all_jobs.extend(qulatrics_jobs)
+        all_jobs.extend(domo_jobs)
+        all_jobs.extend(fusion_jobs)
+        all_jobs.extend(bamboohr_jobs)
+        for company in UtahCompanies:
+            print(f"\nSearching jobs for {company['companyName']}")
+            jobs = common_search(driver, company)
+            all_jobs.extend(jobs)
     finally:
         time.sleep(5)
         driver.quit()
+    return all_jobs
+
+def find_linkedin_jobs():
+    """Search for jobs across multiple companies using a single WebDriver instance."""
+    all_jobs = []
+
+    # utah linkedin jobs
+    utah_driver = setup_webdriver()
+    if not utah_driver:
+        print("WebDriver not initialized.")
+        return []
+    try:
+        print(f"\nSearching Linkedin jobs")
+        jobs = search_utah_linkedin(utah_driver)
+        all_jobs.extend(jobs)
+    finally:
+        time.sleep(5)
+        utah_driver.quit()
+    
+    # usa linkedin jobs 
+    usa_driver = setup_webdriver()
+    if not usa_driver:
+        print("WebDriver not initialized.")
+        return []
+    try:
+        print(f"\nSearching Linkedin jobs")
+        jobs = search_usa_linkedin(usa_driver)
+        all_jobs.extend(jobs)
+    finally:
+        time.sleep(5)
+        usa_driver.quit()
+
+    
     return all_jobs
