@@ -49,7 +49,7 @@ def search_url_linkedin(linkedinURL, driver):
     listings = driver.find_elements(By.CSS_SELECTOR, css_listings_selector)
     listings_num = len(listings)
 
-    while listings_num <= 300:
+    while listings_num <= 150:
         # Scroll down to bottom of the page
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         
@@ -61,7 +61,7 @@ def search_url_linkedin(linkedinURL, driver):
             more_jobs_button = driver.find_element(By.CSS_SELECTOR, "button[aria-label='See more jobs']")
             if more_jobs_button.is_displayed():
                 driver.execute_script("arguments[0].click();", more_jobs_button)
-                print("Clicked 'See more jobs' button.")
+                # print("Clicked 'See more jobs' button.")
                 time.sleep(3)  
         except Exception as e:
             print(f"No 'See more jobs' button or not clickable. {e}")
@@ -120,17 +120,18 @@ def scrapeListing(listing, driver, jobs_found):
     showMoreBtn = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[aria-label="i18n_show_more"]'))
     )
-    print(showMoreBtn)
     driver.execute_script("arguments[0].click();", showMoreBtn)
 
     jobDesc = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.CSS_SELECTOR, ".show-more-less-html__markup.relative.overflow-hidden"))
     ).text
     
+    postTime = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.CSS_SELECTOR, ".posted-time-ago__text.topcard__flavor--metadata"))
+    ).text
+
     experience = findExperience(jobDesc)
     
-    # ("utah" in jobLocation.lower() or "ut" in jobLocation.lower()))
-
     if (contains_keyword(jobTitle) and int(experience) < 3 and
         jobLevel.lower() in levels and
         (companyName.lower() not in blockedCompanies)): 
@@ -141,6 +142,7 @@ def scrapeListing(listing, driver, jobs_found):
             "jobLocation": jobLocation,
             "jobLevel": jobLevel,
             "experience": experience,
+            "postTime": postTime,
         })
 
 # Filtering ----------------------------
@@ -162,7 +164,7 @@ def findExperience(jobDesc):
     if matches:
         for match in matches:
             years_spec = match[0]
-            context = match[1].strip() if match[1] else "general"
+            # context = match[1].strip() if match[1] else "general"
             
             if '+' in years_spec:
                 years = years_spec[:-1]  # remove the "+" and take the number before it
@@ -171,10 +173,10 @@ def findExperience(jobDesc):
             else:
                 years = years_spec  # direct number like "2"
             
-            print(f"Years of experience required: {years}, Context: {context}")
+            # print(f"Years of experience required: {years}, Context: {context}")
             return years
     else:
-        print("No specific years of experience requirement found.")
+        # print("No specific years of experience requirement found.")
         return 0
     
 

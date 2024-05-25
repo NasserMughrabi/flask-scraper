@@ -2,8 +2,8 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import time
-from search import common_search, search_qualtrics, search_domo, search_fusion, search_bamboohr
-from linkedin import search_utah_linkedin, search_usa_linkedin
+from searchSources.utahCompanies import common_search, search_qualtrics, search_domo, search_fusion, search_bamboohr
+from searchSources.linkedin import search_utah_linkedin, search_usa_linkedin
 
 # List of companies and their respective URLs and job search parameters
 UtahCompanies = [
@@ -66,17 +66,17 @@ def find_linkedin_jobs():
         utah_driver.quit()
     
     # usa linkedin jobs 
-    usa_driver = setup_webdriver()
-    if not usa_driver:
-        print("WebDriver not initialized.")
-        return []
-    try:
-        print(f"\nSearching Linkedin jobs")
-        jobs = search_usa_linkedin(usa_driver)
-        all_jobs.extend(jobs)
-    finally:
-        time.sleep(5)
-        usa_driver.quit()
+    # usa_driver = setup_webdriver()
+    # if not usa_driver:
+    #     print("WebDriver not initialized.")
+    #     return []
+    # try:
+    #     print(f"\nSearching Linkedin jobs")
+    #     jobs = search_usa_linkedin(usa_driver)
+    #     all_jobs.extend(jobs)
+    # finally:
+    #     time.sleep(5)
+    #     usa_driver.quit()
 
     
     return all_jobs
